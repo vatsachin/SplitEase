@@ -78,16 +78,17 @@ builder.Services.AddAuthorization();
 var app = builder.Build();
 
 // Configure middleware
-if (app.Environment.IsDevelopment())
-{
+
     app.UseSwagger();
     app.UseSwaggerUI();
-}
+
 
 //app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+
+app.MapGet("/", () => "SplitEase API is running ");
 
 app.Run();
 
