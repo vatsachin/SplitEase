@@ -1,32 +1,31 @@
 version: "3.9"
 
 services:
-  app:
-    build: .
-    container_name: my_app
+  api:
+    build:
+      context: ./backend
+    container_name: dotnet_api
     ports:
-      - "3000:3000"
-    environment:
-      DB_HOST: db
-      DB_PORT: 5432
-      DB_USER: postgres
-      DB_PASSWORD: postgres
-      DB_NAME: mydb
+      - "8080:8080"
     depends_on:
-      - db
+      - mysql
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__DefaultConnection: "Server=mysql;Port=3306;Database=mydb;User=myuser;Password=mypassword;"
 
-  db:
-    image: postgres:15
-    container_name: postgres_db
+  mysql:
+    image: mysql:8
+    container_name: mysql_db
     restart: always
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: mydb
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: mydb
+      MYSQL_USER: myuser
+      MYSQL_PASSWORD: mypassword
     ports:
-      - "5432:5432"
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
 
 volumes:
-  postgres_data:
+  mysql_data:
