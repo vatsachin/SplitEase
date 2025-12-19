@@ -1,31 +1,27 @@
-version: "3.9"
+version: '3.8'
 
 services:
-  api:
-    build:
-      context: ./backend
-    container_name: dotnet_api
-    ports:
-      - "8080:8080"
-    depends_on:
-      - mysql
-    environment:
-      ASPNETCORE_ENVIRONMENT: Production
-      ConnectionStrings__DefaultConnection: "Server=mysql;Port=3306;Database=mydb;User=myuser;Password=mypassword;"
-
-  mysql:
-    image: mysql:8
-    container_name: mysql_db
+  app:
+    build: .
+    container_name: dotnet_app
     restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: mydb
-      MYSQL_USER: myuser
-      MYSQL_PASSWORD: mypassword
     ports:
-      - "3306:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
+      - "5000:5000"
+    networks:
+      - webnet
 
-volumes:
-  mysql_data:
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - app
+    networks:
+      - webnet
+
+networks:
+  webnet:
