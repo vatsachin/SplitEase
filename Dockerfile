@@ -1,6 +1,6 @@
-# Use the official .NET SDK image for building
+# ---------- Build stage ----------
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-WORKDIR /app
+WORKDIR /src
 
 # Copy csproj and restore dependencies
 COPY *.csproj ./
@@ -8,15 +8,20 @@ RUN dotnet restore
 
 # Copy everything else and build
 COPY . ./
-RUN dotnet publish -c Release -o out
+RUN dotnet publish -c Release -o /app/publish
 
-# Use the runtime image for smaller size
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
+# ---------- Runtime stage ----------
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
-COPY --from=build /app/out ./
 
-# Expose the port your app will run on
-EXPOSE 5000
+# Copy published output from build stage
+COPY --from=build /app/publish .
 
-# Run the app
+# Expose the port (ASP.NET Core default)
+EXPOSE 8080
+
+# Set environment variable
+ENV ASPNETCORE_ENVIRONMENT=Development
+
+# Start the application
 ENTRYPOINT ["dotnet", "SplitEase.dll"]
