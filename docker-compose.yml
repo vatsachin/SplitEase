@@ -1,27 +1,22 @@
+version: "3.9"
+
 services:
-  app:
-    container_name: dotnet_app
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    restart: always
+
+  api:
+    build: .
+    container_name: splitease-api
     ports:
       - "8080:8080"
-    networks:
-      - webnet
-
-  nginx:
-    image: nginx:latest
-    container_name: nginx
-    restart: always
-    ports:
-      - "80:80"
-    volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
-      - app
-    networks:
-      - webnet
+      - db
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=db;Database=SplitEase;User=sa;Password=YourPassword123;TrustServerCertificate=True
 
-networks:
-  webnet:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: splitease-db
+    environment:
+      SA_PASSWORD: "YourPassword123"
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1433:1433"
